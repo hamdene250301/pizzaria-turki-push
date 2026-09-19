@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pizzaria Turki — La faim n'attend pas</title>
+<meta name="description" content="Pizzaria Turki — pizzas, sandwichs, makloub & tacos faits maison, livrés chauds à Turki, Grombalia. 11:00 — 21:00 · 52 235 956">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0d0a08; --coal:#17110d; --card:#1d1510;
+  --cream:#f4e9d8; --cream-dim:#c9bba6;
+  --red:#e03e2d; --red-soft:#ff5a45;
+  --gold:#f0a13c; --green:#7aa95c;
+  --serif:"Fraunces",serif; --sans:"Space Grotesk",sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--cream);font-family:var(--sans);overflow-x:hidden;cursor:none}
+::selection{background:var(--red);color:var(--cream)}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:none;border:none;background:none;color:inherit}
+
+/* ---------- noise + progress ---------- */
+.noise{position:fixed;inset:-50%;width:200%;height:200%;pointer-events:none;z-index:200;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  animation:grain 8s steps(10) infinite}
+@keyframes grain{0%,100%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-2%)}80%{transform:translate(3%,3%)}}
+.progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--red),var(--gold));z-index:300}
+
+/* ---------- cursor ---------- */
+.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:400;border-radius:50%;transform:translate(-50%,-50%)}
+.cursor-dot{width:8px;height:8px;background:var(--red)}
+.cursor-ring{width:38px;height:38px;border:1.5px solid rgba(244,233,216,.5);transition:width .3s var(--ease),height .3s var(--ease),border-color .3s,background .3s}
+.cursor-ring.hovered{width:64px;height:64px;border-color:var(--red);background:rgba(224,62,45,.12)}
+@media (hover:none){.cursor-dot,.cursor-ring{display:none}body,button{cursor:auto}}
+
+/* ---------- preloader ---------- */
+.loader{position:fixed;inset:0;background:var(--ink);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .7s var(--ease),visibility .7s}
+.loader.done{opacity:0;visibility:hidden}
+.loader-emblem{width:92px;height:92px;border-radius:50%;background:var(--red);display:grid;place-items:center;font-family:var(--serif);font-weight:900;font-size:2rem;color:var(--cream);animation:pulse 1.4s ease-in-out infinite;box-shadow:0 0 60px rgba(224,62,45,.5)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.loader-word{font-family:var(--serif);font-style:italic;font-size:1.1rem;color:var(--cream-dim)}
+.loader-bar{width:180px;height:2px;background:rgba(244,233,216,.15);overflow:hidden;border-radius:2px}
+.loader-bar i{display:block;height:100%;width:0;background:var(--gold)}
+
+/* ---------- top bar / nav ---------- */
+.topline{position:fixed;top:0;left:0;right:0;z-index:90;display:flex;justify-content:space-between;padding:10px 4vw;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-dim);background:rgba(13,10,8,.75);backdrop-filter:blur(12px);border-bottom:1px solid rgba(244,233,216,.08)}
+.topline .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:8px;animation:pulse 1.6s infinite}
+.topline a{color:var(--gold)}
+header{position:fixed;top:37px;left:0;right:0;z-index:95;display:flex;align-items:center;justify-content:space-between;padding:16px 4vw;transition:background .4s,backdrop-filter .4s,box-shadow .4s}
+header.scrolled{background:rgba(13,10,8,.82);backdrop-filter:blur(16px);box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-emblem{width:46px;height:46px;border-radius:50%;background:var(--red);display:grid;place-items:center;font-family:var(--serif);font-weight:900;font-size:1.05rem;box-shadow:0 6px 20px rgba(224,62,45,.4)}
+.brand-name{font-family:var(--serif);font-weight:600;line-height:.95;font-size:.95rem}
+.brand-name b{font-style:italic;color:var(--gold)}
+nav.desktop{display:flex;gap:34px}
+nav.desktop a{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cream-dim);position:relative;transition:color .3s}
+nav.desktop a::after{content:"";position:absolute;left:0;bottom:-6px;width:0;height:1.5px;background:var(--red);transition:width .35s var(--ease)}
+nav.desktop a:hover{color:var(--cream)}
+nav.desktop a:hover::after{width:100%}
+.cta{padding:12px 26px;border-radius:100px;background:var(--red);color:var(--cream);font-weight:600;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;transition:transform .3s var(--ease),box-shadow .3s;display:inline-block}
+.cta:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(224,62,45,.45)}
+.burger{display:none;flex-direction:column;gap:6px;padding:8px}
+.burger span{width:26px;height:2px;background:var(--cream);transition:.3s}
+.mobile-nav{position:fixed;inset:0;background:var(--coal);z-index:94;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8vh;clip-path:circle(0 at calc(100% - 50px) 60px);transition:clip-path .7s var(--ease)}
+.mobile-nav.open{clip-path:circle(150% at calc(100% - 50px) 60px)}
+.mobile-nav a{font-family:var(--serif);font-size:clamp(2rem,8vw,3rem);font-style:italic}
+.mobile-nav a:hover{color:var(--red)}
+
+/* ---------- hero ---------- */
+.hero{min-height:100vh;position:relative;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:4vw;padding:150px 4vw 80px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none}
+.hero-bg .glow{position:absolute;width:60vw;height:60vw;border-radius:50%;filter:blur(120px);opacity:.16}
+.hero-bg .g1{background:var(--red);top:-20%;right:-15%}
+.hero-bg .g2{background:var(--gold);bottom:-25%;left:-15%;opacity:.1}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:.75rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:26px}
+.hero-eyebrow::before{content:"";width:40px;height:1.5px;background:var(--gold)}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(3.2rem,8.5vw,7.5rem);line-height:.95;letter-spacing:-.02em}
+h1 em{font-style:italic;font-weight:400;color:var(--red);display:inline-block;transform:rotate(-2deg)}
+.hero-intro{margin:30px 0 40px;max-width:46ch;color:var(--cream-dim);font-size:1.08rem;line-height:1.7;font-weight:300}
+.hero-actions{display:flex;align-items:center;gap:30px;flex-wrap:wrap}
+.button{padding:17px 36px;border-radius:100px;font-weight:700;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase;display:inline-flex;align-items:center;gap:10px;transition:transform .35s var(--ease),box-shadow .35s;position:relative;overflow:hidden}
+.button-red{background:var(--red);color:var(--cream)}
+.button-red::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.25) 50%,transparent 70%);transform:translateX(-100%);transition:transform .6s}
+.button-red:hover::before{transform:translateX(100%)}
+.button:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 16px 40px rgba(224,62,45,.4)}
+.text-link{font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-dim);border-bottom:1px solid rgba(244,233,216,.3);padding-bottom:4px;transition:color .3s,border-color .3s}
+.text-link:hover{color:var(--gold);border-color:var(--gold)}
+
+/* 3D pizza */
+.hero-visual{position:relative;display:grid;place-items:center;perspective:1200px}
+.pizza-stage{position:relative;transform-style:preserve-3d;transition:transform .25s ease-out;will-change:transform}
+.pizza-disc{position:relative;width:min(30vw,420px);aspect-ratio:1;border-radius:50%;overflow:hidden;border:10px solid #241a13;box-shadow:0 40px 90px rgba(0,0,0,.65),0 0 0 1px rgba(244,233,216,.12),inset 0 0 60px rgba(0,0,0,.4);animation:float 6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+.pizza-disc img{width:100%;height:100%;object-fit:cover;transform:scale(1.06);animation:slowspin 40s linear infinite}
+@keyframes slowspin{to{transform:scale(1.06) rotate(360deg)}}
+.orbit{position:absolute;inset:-9%;border:1.5px dashed rgba(240,161,60,.4);border-radius:50%;animation:slowspin 30s linear infinite reverse}
+.chip{position:absolute;padding:10px 18px;border-radius:100px;background:rgba(29,21,16,.85);backdrop-filter:blur(8px);border:1px solid rgba(244,233,216,.14);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cream);white-space:nowrap;transform:translateZ(60px);box-shadow:0 14px 30px rgba(0,0,0,.5)}
+.chip b{color:var(--gold)}
+.chip-1{top:6%;left:-8%;animation:float 5s .4s ease-in-out infinite}
+.chip-2{bottom:12%;right:-10%;animation:float 7s .8s ease-in-out infinite}
+.chip-3{top:44%;right:-16%;animation:float 6s .2s ease-in-out infinite}
+.steam{position:absolute;top:-12%;left:50%;transform:translateX(-50%);width:120px;height:120px;pointer-events:none}
+.steam i{position:absolute;bottom:0;left:calc(25% * var(--i));width:14px;height:14px;border-radius:50%;background:rgba(244,233,216,.35);filter:blur(6px);animation:rise 3.2s calc(var(--i)*.5s) infinite}
+@keyframes rise{0%{transform:translateY(0) scale(1);opacity:0}25%{opacity:.7}100%{transform:translateY(-130px) scale(2.6);opacity:0}}
+.scroll-hint{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:var(--cream-dim)}
+.scroll-hint::after{content:"";width:1.5px;height:52px;background:linear-gradient(var(--red),transparent);animation:drip 1.8s ease-in-out infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}55%{transform:scaleY(1);transform-origin:top}56%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ---------- marquee ---------- */
+.marquee{border-top:1px solid rgba(244,233,216,.1);border-bottom:1px solid rgba(244,233,216,.1);padding:20px 0;overflow:hidden;background:var(--coal);transform:rotate(-1.2deg) scale(1.02)}
+.marquee-track{display:flex;gap:48px;width:max-content;animation:marq 22s linear infinite}
+.marquee-track span{font-family:var(--serif);font-size:1.5rem;font-style:italic;white-space:nowrap;display:flex;align-items:center;gap:48px}
+.marquee-track span::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--red)}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* ---------- sections common ---------- */
+section{padding:110px 4vw;position:relative}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:64px;flex-wrap:wrap}
+.kicker{display:flex;align-items:center;gap:12px;font-size:.72rem;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+.kicker::before{content:"";width:34px;height:1.5px;background:var(--gold)}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(2.4rem,5.5vw,4.4rem);line-height:1;letter-spacing:-.015em}
+h2 em{font-style:italic;font-weight:400;color:var(--red)}
+.sec-head p{max-width:36ch;color:var(--cream-dim);font-weight:300;line-height:1.7}
+.reveal{opacity:0;transform:translateY(48px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------- 3D carousel ---------- */
+.carousel-sec{padding-bottom:60px}
+.stage3d{height:480px;perspective:1400px;display:grid;place-items:center;position:relative}
+.ring{position:relative;width:260px;height:360px;transform-style:preserve-3d;transition:transform .1s linear}
+.ring-card{position:absolute;inset:0;border-radius:22px;background:linear-gradient(160deg,#241a13,#150f0b);border:1px solid rgba(244,233,216,.12);padding:26px;display:flex;flex-direction:column;backface-visibility:hidden;box-shadow:0 30px 60px rgba(0,0,0,.5);overflow:hidden}
+.ring-card::before{content:attr(data-num);position:absolute;right:14px;top:8px;font-family:var(--serif);font-style:italic;font-size:4.4rem;color:rgba(244,233,216,.06);font-weight:900}
+.ring-card .tag{align-self:flex-start;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(240,161,60,.4);padding:6px 12px;border-radius:100px;margin-bottom:16px}
+.ring-card h3{font-family:var(--serif);font-size:1.7rem;font-weight:700;line-height:1.05;margin-bottom:10px}
+.ring-card h3 em{font-style:italic;font-weight:400;color:var(--red)}
+.ring-card p{font-size:.82rem;color:var(--cream-dim);line-height:1.6;flex:1;font-weight:300}
+.ring-card .pr{margin-top:14px;font-family:var(--serif);font-size:1.5rem;color:var(--gold)}
+.ring-card .pr small{font-size:.68rem;font-family:var(--sans);color:var(--cream-dim);letter-spacing:.1em;text-transform:uppercase;display:block}
+.stage3d .hint{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);font-size:.68rem;letter-spacing:.28em;text-transform:uppercase;color:var(--cream-dim);display:flex;gap:14px;align-items:center}
+.stage3d .hint::before,.stage3d .hint::after{content:"";width:36px;height:1px;background:rgba(244,233,216,.25)}
+
+/* ---------- menu ---------- */
+.menu-sec{background:var(--coal);border-top:1px solid rgba(244,233,216,.07);border-bottom:1px solid rgba(244,233,216,.07)}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:46px}
+.tab{padding:12px 24px;border-radius:100px;border:1px solid rgba(244,233,216,.18);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-dim);transition:.3s}
+.tab:hover{border-color:var(--gold);color:var(--gold)}
+.tab.active{background:var(--red);border-color:var(--red);color:var(--cream);box-shadow:0 8px 26px rgba(224,62,45,.35)}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.item{background:var(--card);border:1px solid rgba(244,233,216,.08);border-radius:18px;padding:26px;transition:transform .4s var(--ease),border-color .4s,box-shadow .4s;position:relative;overflow:hidden}
+.item:hover{transform:translateY(-6px);border-color:rgba(224,62,45,.5);box-shadow:0 24px 50px rgba(0,0,0,.45)}
+.item .top{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:10px}
+.item h4{font-family:var(--serif);font-size:1.3rem;font-weight:700}
+.item .badge{font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);background:var(--gold);padding:4px 10px;border-radius:100px;white-space:nowrap}
+.item .badge.red{background:var(--red);color:var(--cream)}
+.item p{font-size:.85rem;color:var(--cream-dim);line-height:1.65;font-weight:300;min-height:44px}
+.item .prices{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.item .prices span{font-size:.75rem;border:1px solid rgba(244,233,216,.15);padding:6px 12px;border-radius:100px;color:var(--cream)}
+.item .prices span b{color:var(--gold);font-family:var(--serif);font-size:.95rem}
+.note{margin-top:40px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;color:var(--cream-dim);font-size:.85rem}
+.note b{color:var(--gold);letter-spacing:.1em;text-transform:uppercase;font-size:.72rem}
+.menu-photo{margin-top:60px;border-radius:24px;overflow:hidden;border:1px solid rgba(244,233,216,.12);position:relative}
+.menu-photo img{width:100%;max-height:520px;object-fit:cover;object-position:top;transition:transform 1.2s var(--ease)}
+.menu-photo:hover img{transform:scale(1.04)}
+.menu-photo figcaption{position:absolute;left:0;right:0;bottom:0;padding:26px 30px;background:linear-gradient(transparent,rgba(13,10,8,.92));font-size:.8rem;letter-spacing:.1em;color:var(--cream-dim)}
+.menu-photo figcaption b{color:var(--gold)}
+
+/* ---------- story ---------- */
+.story-grid{display:grid;grid-template-columns:1fr 1fr;gap:5vw;align-items:center}
+.story-photo{position:relative;border-radius:24px;overflow:hidden;transform:rotate(-2deg);border:1px solid rgba(244,233,216,.12);box-shadow:0 40px 80px rgba(0,0,0,.5)}
+.story-photo img{width:100%;height:100%;object-fit:cover;transition:transform 1.4s var(--ease)}
+.story-photo:hover img{transform:scale(1.06)}
+.story-photo .stamp{position:absolute;bottom:18px;left:18px;background:rgba(13,10,8,.8);backdrop-filter:blur(8px);padding:10px 18px;border-radius:100px;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;border:1px solid rgba(244,233,216,.15)}
+.story-photo .stamp b{color:var(--red)}
+.story-copy p.lead{color:var(--cream-dim);font-weight:300;line-height:1.75;margin:26px 0 40px;max-width:50ch}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.fact{border:1px solid rgba(244,233,216,.1);border-radius:16px;padding:22px;text-align:center;transition:.35s var(--ease)}
+.fact:hover{border-color:var(--red);transform:translateY(-4px)}
+.fact strong{display:block;font-family:var(--serif);font-size:1.9rem;color:var(--gold)}
+.fact span{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-dim)}
+
+/* ---------- gallery ---------- */
+.gal-grid{display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:repeat(2,280px);gap:16px}
+.gal{position:relative;border-radius:20px;overflow:hidden;border:1px solid rgba(244,233,216,.1)}
+.gal:first-child{grid-row:span 2}
+.gal img{width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease),filter 1s}
+.gal:hover img{transform:scale(1.07);filter:saturate(1.2)}
+.gal span{position:absolute;left:20px;bottom:18px;font-family:var(--serif);font-style:italic;font-size:1.15rem;text-shadow:0 4px 20px rgba(0,0,0,.8)}
+.gal::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(13,10,8,.75));opacity:0;transition:opacity .5s}
+.gal:hover::after{opacity:1}
+.gal span{z-index:2}
+
+/* ---------- order ---------- */
+.order{text-align:center;overflow:hidden}
+.order .big-tel{display:inline-block;font-family:var(--serif);font-weight:800;font-size:clamp(2.6rem,9vw,7rem);letter-spacing:.02em;margin:30px 0 10px;position:relative;transition:color .3s}
+.order .big-tel:hover{color:var(--red)}
+.order p.sub{color:var(--cream-dim);font-weight:300;max-width:52ch;margin:0 auto 44px;line-height:1.75}
+.order-meta{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:44px}
+.order-meta span{border:1px solid rgba(244,233,216,.16);padding:12px 24px;border-radius:100px;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-dim)}
+.order-meta span b{color:var(--gold)}
+.pulse-ring{position:relative;display:inline-block}
+.pulse-ring::before,.pulse-ring::after{content:"";position:absolute;inset:-14px;border:1.5px solid rgba(224,62,45,.5);border-radius:100px;animation:ripple 2.4s infinite}
+.pulse-ring::after{animation-delay:1.2s}
+@keyframes ripple{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.25);opacity:0}}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid rgba(244,233,216,.08);padding:50px 4vw;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;background:var(--coal)}
+footer .tag{font-family:var(--serif);font-style:italic;color:var(--cream-dim)}
+footer .links{display:flex;gap:26px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase}
+footer .links a{color:var(--cream-dim);transition:color .3s}
+footer .links a:hover{color:var(--gold)}
+
+@media(max-width:900px){
+  nav.desktop{display:none}
+  .burger{display:flex}
+  .hero{grid-template-columns:1fr;padding-top:130px;text-align:center}
+  .hero-eyebrow{justify-content:center}
+  .hero-actions{justify-content:center}
+  .hero-visual{margin-top:50px}
+  .pizza-disc{width:min(70vw,340px)}
+  .story-grid{grid-template-columns:1fr}
+  .gal-grid{grid-template-columns:1fr;grid-template-rows:repeat(3,240px)}
+  .gal:first-child{grid-row:auto}
+  section{padding:80px 5vw}
+  .topline{font-size:.6rem}
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="noise"></div>
+<div class="cursor-dot" id="cdot"></div>
+<div class="cursor-ring" id="cring"></div>
+
+<div class="loader" id="loader">
+  <div class="loader-emblem">PT</div>
+  <div class="loader-word">le four chauffe…</div>
+  <div class="loader-bar"><i id="lbar"></i></div>
+</div>
+
+<div class="topline">
+  <span>Turki · Grombalia</span>
+  <span><span class="dot"></span>Ouvert · 11:00 — 21:00 · <a href="tel:+21652235956">52 235 956</a></span>
+</div>
+
+<header id="header">
+  <a class="brand" href="#top">
+    <span class="brand-emblem">PT</span>
+    <span class="brand-name">Pizzaria<br><b>Turki</b></span>
+  </a>
+  <nav class="desktop">
+    <a href="#favoris">Favoris</a>
+    <a href="#menu">Menu</a>
+    <a href="#maison">La maison</a>
+    <a href="#photos">Photos</a>
+  </nav>
+  <a class="cta" href="tel:+21652235956">Commander</a>
+  <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+</header>
+
+<div class="mobile-nav" id="mnav">
+  <a href="#favoris">Favoris</a>
+  <a href="#menu">Menu</a>
+  <a href="#maison">La maison</a>
+  <a href="#photos">Photos</a>
+  <a href="tel:+21652235956" style="color:var(--gold)">52 235 956</a>
+</div>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"><div class="glow g1"></div><div class="glow g2"></div></div>
+    <div class="reveal in">
+      <p class="hero-eyebrow">Pizzeria · Turki, Grombalia</p>
+      <h1>La faim<br><em>n'attend pas.</em></h1>
+      <p class="hero-intro">Des pizzas généreuses, des sandwichs qui calent bien et le goût du fait maison. Préparé chaud, livré chez vous — de 11h à 21h, sept jours sur sept.</p>
+      <div class="hero-actions">
+        <a class="button button-red" href="#menu">Voir le menu</a>
+        <a class="text-link" href="tel:+21652235956">Commander · 52 235 956</a>
+      </div>
+    </div>
+    <div class="hero-visual reveal in">
+      <div class="pizza-stage" id="pizzaStage">
+        <div class="steam"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i></div>
+        <div class="orbit"></div>
+        <div class="pizza-disc"><img src="assets/hero.jpg" alt="Pizza généreuse de Pizzaria Turki"></div>
+        <div class="chip chip-1"><b>★</b> Fait maison</div>
+        <div class="chip chip-2">Pâte <b>double</b> disponible</div>
+        <div class="chip chip-3">Livraison <b>gratuite</b></div>
+      </div>
+    </div>
+    <div class="scroll-hint">Explorer</div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee">
+    <div class="marquee-track" id="marq">
+      <span>Pizza</span><span>Makloub</span><span>Tacos</span><span>Baguette farcie</span><span>Calzone</span><span>Cornet</span><span>Chapati</span><span>Crêpe</span>
+    </div>
+  </div>
+
+  <!-- 3D CAROUSEL -->
+  <section class="carousel-sec" id="favoris">
+    <div class="sec-head reveal">
+      <div>
+        <p class="kicker">Les favoris de la maison</p>
+        <h2>Choisis ton<br><em>plaisir.</em></h2>
+      </div>
+      <p>Une carte courte, généreuse et claire. Attrape une carte, fais tourner le carrousel — tout est fait minute.</p>
+    </div>
+    <div class="stage3d reveal">
+      <div class="ring" id="ring"></div>
+      <div class="hint">Glisse pour tourner</div>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section class="menu-sec" id="menu">
+    <div class="sec-head reveal">
+      <div>
+        <p class="kicker">La carte complète</p>
+        <h2>Tout voir,<br><em>sans deviner.</em></h2>
+      </div>
+      <p>Les prix suivent le menu affiché en boutique : formats min, moyen et max selon les recettes.</p>
+    </div>
+    <div class="tabs reveal" id="tabs"></div>
+    <div class="items reveal" id="items"></div>
+    <div class="note reveal">
+      <span><b>Options ·</b> Suppléments, boissons & sauces maison</span>
+      <a class="text-link" href="https://www.instagram.com/pizzariaturki/" target="_blank" rel="noreferrer">@pizzariaturki sur Instagram</a>
+    </div>
+    <figure class="menu-photo reveal">
+      <img src="assets/menu.jpg" alt="Menu original de Pizzaria Turki avec les prix">
+      <figcaption><b>Le menu original</b> — affiché en boutique, mis à jour sur Instagram</figcaption>
+    </figure>
+  </section>
+
+  <!-- STORY -->
+  <section id="maison">
+    <div class="story-grid">
+      <div class="story-photo reveal">
+        <img src="assets/story.jpg" alt="Calzone dorée avec frites et sauces maison">
+        <span class="stamp">Préparé avec envie · <b>Turki</b></span>
+      </div>
+      <div class="story-copy reveal">
+        <p class="kicker">02 · La maison</p>
+        <h2>Simplement<br><em>bon.</em></h2>
+        <p class="lead">Chez Pizzaria Turki, on prépare ce qu'on aime manger : une pâte bien cuite, des garnitures généreuses et des recettes qui font plaisir sans faire compliqué. Chaque commande part chaude du four — à emporter ou livrée chez vous.</p>
+        <div class="facts">
+          <div class="fact"><strong>11:00</strong><span>Ouverture</span></div>
+          <div class="fact"><strong>21:00</strong><span>Dernière commande</span></div>
+          <div class="fact"><strong>100%</strong><span>Envie de revenir</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section id="photos">
+    <div class="sec-head reveal">
+      <div>
+        <p class="kicker">Vu sur Instagram</p>
+        <h2>Ça sort<br><em>du four.</em></h2>
+      </div>
+      <a class="text-link" href="https://www.instagram.com/pizzariaturki/" target="_blank" rel="noreferrer">Suivre @pizzariaturki</a>
+    </div>
+    <div class="gal-grid reveal">
+      <a class="gal" href="https://www.instagram.com/pizzariaturki/" target="_blank" rel="noreferrer"><img src="assets/g1.jpg" alt="Pizza généreuse"><span>Pizza · généreuse</span></a>
+      <a class="gal" href="https://www.instagram.com/pizzariaturki/" target="_blank" rel="noreferrer"><img src="assets/g2.jpg" alt="Spécialité salée faite maison"><span>Fait maison</span></a>
+      <a class="gal" href="https://www.instagram.com/pizzariaturki/" target="_blank" rel="noreferrer"><img src="assets/g3.jpg" alt="Pizza et spécialités"><span>À partager</span></a>
+    </div>
+  </section>
+
+  <!-- ORDER -->
+  <section class="order">
+    <p class="kicker reveal" style="justify-content:center">03 · À table</p>
+    <h2 class="reveal">On te prépare<br><em>ça ?</em></h2>
+    <p class="sub reveal">Appelle-nous pour commander. Livraison à domicile sur Turki & Grombalia, ou passe récupérer ta commande chaude du four.</p>
+    <span class="pulse-ring reveal"><a class="big-tel" href="tel:+21652235956">52 235 956</a></span>
+    <div class="order-meta reveal">
+      <span>Livraison <b>à domicile</b></span>
+      <span>Turki <b>·</b> Grombalia</span>
+      <span><b>11:00 — 21:00</b></span>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <a class="brand" href="#top">
+    <span class="brand-emblem">PT</span>
+    <span class="brand-name">Pizzaria<br><b>Turki</b></span>
+  </a>
+  <span class="tag">Chaud, généreux, chez vous.</span>
+  <div class="links">
+    <a href="https://www.instagram.com/pizzariaturki/" target="_blank" rel="noreferrer">Instagram</a>
+    <a href="tel:+21652235956">52 235 956</a>
+  </div>
+</footer>
+
+<script>
+/* ================= DATA ================= */
+const FAVORIS=[
+ {n:"Pizza <em>Margherita</em>",t:"La classique",d:"Sauce tomate, mozzarella fondante et origan. Simple, exacte, irrésistible.",p:"dès 6 DT"},
+ {n:"Pizza <em>4 Fromages</em>",t:"Creamy",d:"Mozzarella, emmental, fromage bleu et chèvre. Le carré qui fond.",p:"dès 9 DT"},
+ {n:"Pizza <em>Escalope</em>",t:"La star",d:"Escalope grillée, champignons, olives et sauce maison sur pâte moelleuse.",p:"dès 10 DT"},
+ {n:"Baguette <em>Escalope</em>",t:"Bien garnie",d:"Baguette croustillante garnie à la minute, crudités fraîches et sauce algérienne.",p:"10 DT"},
+ {n:"Sandwich <em>Thon</em>",t:"Sur le pouce",d:"Thon généreux, œuf, olives et harissa douce dans un pain brioché.",p:"5 DT"},
+ {n:"Makloub <em>Escalope</em>",t:"Spécialité",d:"Pain makloub grillé, escalope émincée, frites maison et fromage fondu.",p:"8 DT"},
+ {n:"Tacos <em>Maison</em>",t:"Sauce fromagère",d:"Galette grillée, viande au choix, frites et sauce fromagère signature.",p:"sur place"},
+ {n:"Calzone <em>Jambon</em>",t:"Chausson doré",d:"Pâte pliée et dorée au four : escalope ou thon, jambon, fromage coulant.",p:"dès 13 DT"},
+];
+const MENU={
+ "Pizza":[
+  {n:"Margherita",d:"Sauce tomate maison, mozzarella fondante, origan frais — la base parfaite.",p:[["Min",6],["Moy",9],["Max",13]]},
+  {n:"Thon",d:"Thon généreux, oignons rouges, olives noires, mozzarella.",p:[["Min",7],["Moy",10],["Max",15]]},
+  {n:"Quatre Fromages",d:"Mozzarella, emmental, bleu et chèvre — le mix qui file.",b:"Creamy",p:[["Min",9],["Moy",12],["Max",16]]},
+  {n:"Salami",d:"Salami épicé, poivrons grillés, olives, double couche de fromage.",p:[["Min",7],["Moy",10],["Max",15]]},
+  {n:"Escalope",d:"Escalope grillée à la commande, champignons, sauce de la maison.",b:"La star",p:[["Min",10],["Moy",14],["Max",18]]},
+  {n:"Champignon",d:"Champignons frais poêlés, tomate, oignons, mozzarella généreuse.",p:[["Min",9],["Moy",12],["Max",15]]},
+  {n:"Double Pâte",d:"Deux pâtes moelleuses superposées, garniture XXL pour les grandes faims.",b:"XXL",p:[["Moy",16],["Max",20]]},
+  {n:"Escalope · Sauce blanche",d:"Base crème, escalope, champignons, poivrons — la douceur du four.",p:[["Min",10],["Moy",15],["Max",19]]},
+ ],
+ "Baguette farcie":[
+  {n:"Escalope",d:"Baguette croustillante, escalope grillée, crudités et sauce au choix.",p:[["Prix",10]]},
+  {n:"Thon",d:"Thon, œuf, olives, harissa douce et légumes croquants.",p:[["Prix",9]]},
+  {n:"Jambon",d:"Jambon fondant, fromage, cornichons et sauce algérienne.",p:[["Prix",9]]},
+  {n:"Salami",d:"Salami épicé, double fromage et oignons confits.",p:[["Prix",8]]},
+ ],
+ "Sandwich":[
+  {n:"Escalope",d:"Pain brioché toasté, escalope croustillante, frites et sauce maison.",b:"Best-seller",p:[["Prix",6]]},
+  {n:"Thon",d:"Thon, œuf dur, olives et un trait de citron.",p:[["Prix",5]]},
+  {n:"Double Fromages",d:"Mozzarella + emmental fondus sur crudités fraîches.",p:[["Prix",4]]},
+  {n:"Jambon",d:"Jambon, fromage, beurre léger et cornichons.",p:[["Prix",4]]},
+  {n:"Spécial Turki",d:"La recette de la maison — demandez-la, on ne la note pas.",b:"Maison",p:[["Prix","—"]]},
+ ],
+ "Makloub & Tacos":[
+  {n:"Makloub Escalope",d:"Pain makloub grillé, escalope émincée, frites, fromage fondu.",b:"Spécialité",p:[["Prix",8]]},
+  {n:"Makloub Thon",d:"Thon épicé, œuf, olives et harissa de la maison.",p:[["Prix",7]]},
+  {n:"Makloub Jambon",d:"Jambon, fromage double et sauce blanche.",p:[["Prix",7]]},
+  {n:"Makloub Salami",d:"Salami grillé, oignons et poivrons.",p:[["Prix",6]]},
+  {n:"Tacos Maison",d:"Galette grillée, viande au choix, frites et sauce fromagère signature.",b:"Signature",p:[["Prix","sur place"]]},
+ ],
+ "Cornet":[
+  {n:"Escalope",d:"Cornet croustillant garni d'escalope, frites maison et deux sauces.",b:"Gourmand",p:[["Prix",12]]},
+  {n:"Thon",d:"Thon crémeux, crudités et sauce algérienne.",p:[["Prix",11]]},
+  {n:"Jambon",d:"Jambon-fromage fondu, cornichons, sauce blanche.",p:[["Prix",11]]},
+  {n:"Salami",d:"Salami épicé, double fromage et frites croustillantes.",p:[["Prix",10]]},
+ ],
+ "Calzone":[
+  {n:"Escalope & Jambon",d:"Chausson doré au four, escalope, jambon et fromage coulant.",b:"Chaud",p:[["Prix",14]]},
+  {n:"Thon & Jambon",d:"Thon, jambon, mozzarella — plié, scellé, gratiné.",p:[["Prix",13]]},
+ ],
+ "Chapati & Crêpe":[
+  {n:"Chapati Thon",d:"Chapati moelleux, thon, œuf et olives.",p:[["Prix","voir boutique"]]},
+  {n:"Chapati Double Fromages",d:"Double mozzarella fondue, touche de miel au choix.",p:[["Prix","voir boutique"]]},
+  {n:"Chapati Spécial",d:"Le chapati de la maison, garni sans compter.",b:"Maison",p:[["Prix","voir boutique"]]},
+  {n:"Crêpe Nutella",d:"Crêpe tiède, Nutella généreux — le dessert qui finit bien.",p:[["Prix","voir boutique"]]},
+  {n:"Crêpe Fromage",d:"Fromage fondu et herbes — la version salée.",p:[["Prix","voir boutique"]]},
+ ],
+};
+
+/* ================= PRELOADER ================= */
+const loader=document.getElementById('loader'),lbar=document.getElementById('lbar');
+let lp=0;const li=setInterval(()=>{lp=Math.min(100,lp+Math.random()*22);lbar.style.width=lp+'%';
+ if(lp>=100){clearInterval(li);setTimeout(()=>loader.classList.add('done'),350);}},180);
+window.addEventListener('load',()=>{lp=100});
+
+/* ================= CURSOR ================= */
+const cdot=document.getElementById('cdot'),cring=document.getElementById('cring');
+let mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
+addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cdot.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`;});
+(function ringLoop(){rx+=(mx-rx)*.16;ry+=(my-ry)*.16;cring.style.transform=`translate(${rx}px,${ry}px) translate(-50%,-50%)`;requestAnimationFrame(ringLoop);})();
+document.querySelectorAll('a,button,.tab,.item,.gal,.ring-card').forEach(el=>{
+ el.addEventListener('mouseenter',()=>cring.classList.add('hovered'));
+ el.addEventListener('mouseleave',()=>cring.classList.remove('hovered'));
+});
+
+/* ================= HEADER / PROGRESS ================= */
+const header=document.getElementById('header'),prog=document.getElementById('progress');
+addEventListener('scroll',()=>{
+ header.classList.toggle('scrolled',scrollY>40);
+ const h=document.documentElement.scrollHeight-innerHeight;
+ prog.style.width=(scrollY/h*100)+'%';
+},{passive:true});
+
+/* ================= MOBILE NAV ================= */
+const burger=document.getElementById('burger'),mnav=document.getElementById('mnav');
+burger.addEventListener('click',()=>mnav.classList.toggle('open'));
+mnav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mnav.classList.remove('open')));
+
+/* ================= MARQUEE (duplicate for seamless loop) ================= */
+const marq=document.getElementById('marq');marq.innerHTML+=marq.innerHTML;
+
+/* ================= 3D PIZZA TILT ================= */
+const stage=document.getElementById('pizzaStage');
+addEventListener('mousemove',e=>{
+ if(innerWidth<900)return;
+ const cx=(e.clientX/innerWidth-.5),cy=(e.clientY/innerHeight-.5);
+ stage.style.transform=`rotateY(${cx*16}deg) rotateX(${-cy*14}deg)`;
+});
+
+/* ================= 3D RING CAROUSEL ================= */
+const ring=document.getElementById('ring');
+const N=FAVORIS.length,RADIUS=innerWidth<700?300:430;
+FAVORIS.forEach((f,i)=>{
+ const c=document.createElement('div');c.className='ring-card';c.dataset.num=String(i+1).padStart(2,'0');
+ c.innerHTML=`<span class="tag">${f.t}</span><h3>${f.n}</h3><p>${f.d}</p><div class="pr"><small>à partir de</small>${f.p}</div>`;
+ c.style.transform=`rotateY(${i*(360/N)}deg) translateZ(${RADIUS}px)`;
+ ring.appendChild(c);
+});
+let rot=0,vel=.12,dragging=false,lastX=0;
+function ringLoop(){
+ if(!dragging){rot+=vel;vel+=(0.12-vel)*.02;}
+ ring.style.transform=`rotateY(${rot}deg)`;
+ requestAnimationFrame(ringLoop);
+}
+ringLoop();
+const st3=document.querySelector('.stage3d');
+st3.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;vel=0;});
+addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-lastX;lastX=e.clientX;rot+=dx*.35;vel=dx*.06;});
+addEventListener('pointerup',()=>dragging=false);
+
+/* ================= MENU TABS ================= */
+const tabs=document.getElementById('tabs'),items=document.getElementById('items');
+Object.keys(MENU).forEach((cat,i)=>{
+ const b=document.createElement('button');b.className='tab'+(i===0?' active':'');b.textContent=cat;
+ b.addEventListener('click',()=>{
+   tabs.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');renderItems(cat);
+ });
+ tabs.appendChild(b);
+});
+function renderItems(cat){
+ items.style.opacity=0;items.style.transform='translateY(16px)';
+ setTimeout(()=>{
+  items.innerHTML=MENU[cat].map(it=>`
+   <div class="item">
+     <div class="top"><h4>${it.n}</h4>${it.b?`<span class="badge ${it.b==='Maison'||it.b==='Signature'?'':'red'}">${it.b}</span>`:''}</div>
+     <p>${it.d}</p>
+     <div class="prices">${it.p.map(([l,v])=>`<span>${l} <b>${v}${typeof v==='number'?' DT':''}</b></span>`).join('')}</div>
+   </div>`).join('');
+  items.style.transition='opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)';
+  items.style.opacity=1;items.style.transform='none';
+ },180);
+}
+renderItems("Pizza");
+
+/* ================= SCROLL REVEAL ================= */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ================= MAGNETIC CTA ================= */
+document.querySelectorAll('.cta,.button').forEach(el=>{
+ el.addEventListener('mousemove',e=>{
+  const r=el.getBoundingClientRect();
+  el.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.18}px,${(e.clientY-r.top-r.height/2)*.28}px)`;
+ });
+ el.addEventListener('mouseleave',()=>el.style.transform='');
+});
+</script>
+</body>
+</html>
